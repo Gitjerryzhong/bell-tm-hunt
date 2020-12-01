@@ -124,10 +124,11 @@ select new map(
     rt.type as type,
     sum (case when r.reportType != 1 or r.status in (:passStates) then 1 else 0 end) as countProject,
     sum (case when r.status = 'CHECKED' then 1 else 0 end) as countUncheck,
-    sum (case when r.status = 'FINISHED' and r.conclusionOfUniversity = 'OK' then 1 else 0 end) as countPass,
-    sum (case when r.status = 'FINISHED' and r.conclusionOfUniversity = 'VETO' then 1 else 0 end) as countFail
+    sum (case when r.status = 'FINISHED' and ((p.level = 'UNIVERSITY' and r.conclusionOfUniversity = 'OK') or (p.level = 'PROVINCE' and r.conclusionOfProvince = 'OK')) then 1 else 0 end) as countPass,
+    sum (case when r.status = 'FINISHED' and ((p.level = 'UNIVERSITY' and r.conclusionOfUniversity = 'VETO') or (p.level = 'PROVINCE' and r.conclusionOfProvince = 'VETO')) then 1 else 0 end) as countFail
 )
 from Review r
+join r.project p
 right join r.reviewTask rt
 group by rt.id, rt.title, rt.endDate, rt.type
 order by rt.dateCreated desc
